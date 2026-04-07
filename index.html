@@ -183,19 +183,34 @@
 
         <!-- Content Editing -->
         <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-slate-300 mb-1">Heading Text</label>
-                <input type="text" id="heading-input" value="The stars are aligning." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition">
+            <!-- Heading -->
+            <div class="bg-slate-700/30 p-3 rounded-lg border border-slate-600/50 space-y-2">
+                <label class="block text-sm font-medium text-slate-300">Heading</label>
+                <input type="text" id="heading-input" value="The stars are aligning." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 transition text-sm">
+                <div class="flex gap-2 items-center">
+                    <input type="text" id="heading-font" placeholder="Google Font (e.g. Cinzel)" value="Cinzel" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-indigo-500 transition text-xs" title="Press Enter or click away to apply font">
+                    <input type="color" id="heading-color" value="#fce7ab" title="Heading Color">
+                </div>
             </div>
             
-            <div>
-                <label class="block text-sm font-medium text-slate-300 mb-1">Sub-heading / Body</label>
-                <textarea id="body-input" rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition resize-none">WE ARE SEEKING A PROFESSIONAL ASTROLOGER TO JOIN OUR GROWING COMMUNITY.</textarea>
+            <!-- Body -->
+            <div class="bg-slate-700/30 p-3 rounded-lg border border-slate-600/50 space-y-2">
+                <label class="block text-sm font-medium text-slate-300">Sub-heading / Body</label>
+                <textarea id="body-input" rows="3" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 transition resize-none text-sm">WE ARE SEEKING A PROFESSIONAL ASTROLOGER TO JOIN OUR GROWING COMMUNITY.</textarea>
+                <div class="flex gap-2 items-center">
+                    <input type="text" id="body-font" placeholder="Google Font (e.g. Cinzel)" value="Cinzel" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-indigo-500 transition text-xs" title="Press Enter or click away to apply font">
+                    <input type="color" id="body-color" value="#fce7ab" title="Body Color">
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-slate-300 mb-1">Footer Text</label>
-                <input type="text" id="footer-input" value="APPLY AT THE LINK IN BIO ✨ #ASTROLOGY" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition">
+            <!-- Footer -->
+            <div class="bg-slate-700/30 p-3 rounded-lg border border-slate-600/50 space-y-2">
+                <label class="block text-sm font-medium text-slate-300">Footer Text</label>
+                <input type="text" id="footer-input" value="APPLY AT THE LINK IN BIO ✨ #ASTROLOGY" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 transition text-sm">
+                <div class="flex gap-2 items-center">
+                    <input type="text" id="footer-font" placeholder="Google Font (e.g. Inter)" value="Inter" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-indigo-500 transition text-xs" title="Press Enter or click away to apply font">
+                    <input type="color" id="footer-color" value="#fce7ab" title="Footer Color">
+                </div>
             </div>
         </div>
 
@@ -203,6 +218,18 @@
         <div class="space-y-4 pt-4 border-t border-slate-700">
             <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Styling & Colors</h3>
             
+            <!-- Background Image Upload -->
+            <div class="bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
+                <label class="block text-sm font-medium text-slate-300 mb-2">Background Image (Overrides Colors)</label>
+                <input type="file" id="bg-upload" accept="image/*" class="block w-full text-sm text-slate-400
+                    file:mr-4 file:py-1.5 file:px-3
+                    file:rounded-full file:border-0
+                    file:text-xs file:font-semibold
+                    file:bg-slate-600 file:text-white
+                    hover:file:bg-slate-500 transition cursor-pointer">
+                <button id="remove-bg-btn" class="hidden mt-2 text-xs text-red-400 hover:text-red-300 underline">Remove Image</button>
+            </div>
+
             <div class="flex items-center justify-between bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
                 <label class="text-sm text-slate-300">Background Top</label>
                 <input type="color" id="bg-color-1" value="#1a1a2e">
@@ -214,8 +241,8 @@
             </div>
 
             <div class="flex items-center justify-between bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
-                <label class="text-sm text-slate-300">Text Color</label>
-                <input type="color" id="text-color" value="#fce7ab">
+                <label class="text-sm text-slate-300">Border Tint Color</label>
+                <input type="color" id="border-color" value="#d4af37">
             </div>
 
             <div class="flex items-center justify-between bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
@@ -291,17 +318,28 @@
             const bodyInput = document.getElementById('body-input');
             const footerInput = document.getElementById('footer-input');
             
+            const headingFont = document.getElementById('heading-font');
+            const bodyFont = document.getElementById('body-font');
+            const footerFont = document.getElementById('footer-font');
+            
+            const headingColor = document.getElementById('heading-color');
+            const bodyColor = document.getElementById('body-color');
+            const footerColor = document.getElementById('footer-color');
+            
             const renderHeading = document.getElementById('render-heading');
             const renderBody = document.getElementById('render-body');
             const renderFooter = document.getElementById('render-footer');
             
             const bgColor1 = document.getElementById('bg-color-1');
             const bgColor2 = document.getElementById('bg-color-2');
-            const textColor = document.getElementById('text-color');
+            const borderColor = document.getElementById('border-color');
             const glowColor = document.getElementById('glow-color');
             const watermarkOpacity = document.getElementById('watermark-opacity');
             const opacityVal = document.getElementById('opacity-val');
             
+            const bgUpload = document.getElementById('bg-upload');
+            const removeBgBtn = document.getElementById('remove-bg-btn');
+
             const postCanvas = document.getElementById('post-canvas');
             const downloadBtn = document.getElementById('download-btn');
 
@@ -337,19 +375,81 @@
             updateText(bodyInput, renderBody);
             updateText(footerInput, renderFooter);
 
+            // Font Loading Logic
+            const loadedFonts = new Set(['Cinzel', 'Inter']);
+            const loadGoogleFont = (fontName) => {
+                if (!fontName) return;
+                const cleanName = fontName.trim();
+                if (!loadedFonts.has(cleanName)) {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = `https://fonts.googleapis.com/css2?family=${cleanName.replace(/\s+/g, '+')}:wght@300;400;600;700&display=swap`;
+                    document.head.appendChild(link);
+                    loadedFonts.add(cleanName);
+                }
+            };
+
+            const setupFontControl = (fontInput, renderEl) => {
+                fontInput.addEventListener('change', (e) => {
+                    const fontName = e.target.value;
+                    loadGoogleFont(fontName);
+                    renderEl.style.fontFamily = `"${fontName}", sans-serif`;
+                });
+            };
+            setupFontControl(headingFont, renderHeading);
+            setupFontControl(bodyFont, renderBody);
+            setupFontControl(footerFont, renderFooter);
+
+            // Segment Color Logic
+            const setupColorControl = (colorInput, renderEl) => {
+                colorInput.addEventListener('input', (e) => {
+                    renderEl.style.color = e.target.value;
+                });
+            };
+            setupColorControl(headingColor, renderHeading);
+            setupColorControl(bodyColor, renderBody);
+            setupColorControl(footerColor, renderFooter);
+
+            let currentBgImage = null;
+
             // Handle Colors & Styling Real-time
             const updateBackground = () => {
-                postCanvas.style.background = `linear-gradient(135deg, ${bgColor1.value} 0%, ${bgColor2.value} 100%)`;
+                if (currentBgImage) {
+                    postCanvas.style.background = `url(${currentBgImage})`;
+                    postCanvas.style.backgroundSize = 'cover';
+                    postCanvas.style.backgroundPosition = 'center';
+                } else {
+                    postCanvas.style.background = `linear-gradient(135deg, ${bgColor1.value} 0%, ${bgColor2.value} 100%)`;
+                }
             };
+
+            // Handle Background Image Upload
+            bgUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        currentBgImage = event.target.result;
+                        updateBackground();
+                        removeBgBtn.classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Handle Background Image Removal
+            removeBgBtn.addEventListener('click', () => {
+                currentBgImage = null;
+                bgUpload.value = ''; // Reset input
+                updateBackground();
+                removeBgBtn.classList.add('hidden');
+            });
+
             bgColor1.addEventListener('input', updateBackground);
             bgColor2.addEventListener('input', updateBackground);
 
-            textColor.addEventListener('input', (e) => {
+            borderColor.addEventListener('input', (e) => {
                 const color = e.target.value;
-                renderHeading.style.color = color;
-                renderBody.style.color = color;
-                renderFooter.style.color = color;
-                // Update border color to match text color slightly transparent
                 document.querySelector('.canvas-border').style.borderColor = `${color}4D`; // 30% opacity hex
             });
 

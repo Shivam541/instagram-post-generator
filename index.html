@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astrology Post Generator</title>
+    
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- html2canvas for generating the final image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Elegant Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --glow-color: #d4af37;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Tailwind slate-900 */
+        }
+
+        .font-serif {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Custom Scrollbar for the sidebar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Canvas Wrapper to maintain Aspect Ratio and scaling */
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 450px; /* Base width for preview */
+            margin: 0 auto;
+            aspect-ratio: 4 / 5; /* Standard Instagram Portrait */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        /* Actual Canvas Element that gets exported */
+        #post-canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            text-align: center;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* Decorative Borders */
+        .canvas-border {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            right: 1.5rem;
+            bottom: 1.5rem;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .canvas-border::before, .canvas-border::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.6);
+        }
+        .canvas-border::before { top: -4px; left: -4px; }
+        .canvas-border::after { bottom: -4px; right: -4px; }
+
+        /* The glowing text effect */
+        .glow-text {
+            text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color), 0 0 30px var(--glow-color);
+        }
+
+        /* Logo Positioning */
+        .watermark-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            opacity: 0.1; /* Translucent */
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .corner-logo {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            z-index: 20;
+        }
+
+        .logo-tl {
+            top: 2rem;
+            left: 2rem;
+        }
+
+        .logo-br {
+            bottom: 2rem;
+            right: 2rem;
+        }
+
+        /* Content Z-index to stay above watermark */
+        .canvas-content {
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            padding: 0;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="text-gray-200 h-screen overflow-hidden flex flex-col md:flex-row">
+
+    <!-- Sidebar Controls -->
+    <aside class="w-full md:w-[400px] bg-slate-800 border-r border-slate-700 h-full overflow-y-auto p-6 flex flex-col gap-6 shadow-xl z-20 shrink-0">
+        <div class="mb-2">
+            <h1 class="text-2xl font-serif text-white font-bold tracking-wider">Post Creator</h1>
+            <p class="text-sm text-slate-400 mt-1">Design your social media graphics.</p>
+        </div>
+
+        <!-- Image Upload -->
+        <div class="bg-slate-700/50 p-4 rounded-xl border border-slate-600">
+            <label class="block text-sm font-medium text-slate-300 mb-2">Upload Logo (PNG/JPG)</label>
+            <input type="file" id="logo-upload" accept="image/*" class="block w-full text-sm text-slate-400
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-indigo-600 file:text-white
+                hover:file:bg-indigo-700 transition cursor-pointer">
+            <p class="text-xs text-slate-400 mt-2">Logo will appear as a background watermark, and at the top-left & bottom-right.</p>
+        </div>
+
+        <!-- Content Editing -->
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Heading Text</label>
+                <input type="text" id="heading-input" value="The stars are aligning." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Sub-heading / Body</label>
+                <textarea id="body-input" rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition resize-none">WE ARE SEEKING A PROFESSIONAL ASTROLOGER TO JOIN OUR GROWING COMMUNITY.</textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Footer Text</label>
+                <input type="text" id="footer-input" value="APPLY AT THE LINK IN BIO ✨ #ASTROLOGY" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition">
+            </div>
+        </div>
+
+        <!-- Styling Controls -->
+        <div class="space-y-4 pt-4 border-t border-slate-700">
+            <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Styling & Colors</h3>
+            
+            <div class="flex items-center justify-between bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
+                <label class="text-sm text-slate-300">Background Top</label>
+                <input type="color" id="bg-color-1" value="#1a1a2e">
+            </div>
+            
+            <div class="flex items-center justify-between bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
+                <label class="text-sm text-slate-300">Background Bottom</label>
+                <input type="color" id="bg-color-2" value="#16213e">
+            </div>
+
+            <div class="flex items-center justify-between bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
+                <label class="text-sm text-slate-300">Text Color</label>
+                <input type="color" id="text-color" value="#fce7ab">
+            </div>
+
+            <div class="flex items-center justify-between bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
+                <label class="text-sm text-slate-300">Glow Effect Color</label>
+                <input type="color" id="glow-color" value="#d4af37">
+            </div>
+
+            <div class="flex flex-col gap-2 bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
+                <label class="text-sm text-slate-300 flex justify-between">
+                    <span>Watermark Opacity</span>
+                    <span id="opacity-val">10%</span>
+                </label>
+                <input type="range" id="watermark-opacity" min="0" max="100" value="10" class="w-full accent-indigo-500">
+            </div>
+        </div>
+
+        <button id="download-btn" class="mt-auto w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-indigo-500/30 transition-all flex justify-center items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Download Post</span>
+        </button>
+    </aside>
+
+    <!-- Preview Area -->
+    <main class="flex-1 bg-slate-900 relative overflow-y-auto overflow-x-hidden flex items-center justify-center p-8 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
+        
+        <div class="canvas-wrapper group" id="canvas-wrapper">
+            <!-- The actual DOM element to be captured -->
+            <div id="post-canvas">
+                
+                <!-- Logos -->
+                <img id="watermark-img" class="watermark-logo hidden" src="" alt="">
+                <img id="logo-tl-img" class="corner-logo logo-tl hidden" src="" alt="">
+                <img id="logo-br-img" class="corner-logo logo-br hidden" src="" alt="">
+
+                <!-- Decorative elements -->
+                <div class="canvas-border"></div>
+
+                <!-- Text Content -->
+                <div class="canvas-content h-full flex flex-col justify-between py-12">
+                    
+                    <!-- Top section (Empty for spacing, or can hold content) -->
+                    <div class="flex-1"></div>
+
+                    <!-- Middle Section (Heading & Body) -->
+                    <div class="flex flex-col gap-6">
+                        <h1 id="render-heading" class="font-serif text-3xl md:text-4xl text-[#fce7ab] glow-text leading-tight">
+                            The stars are aligning.
+                        </h1>
+                        <p id="render-body" class="font-serif text-xl md:text-2xl text-[#fce7ab] leading-snug whitespace-pre-wrap">WE ARE SEEKING A PROFESSIONAL ASTROLOGER TO JOIN OUR GROWING COMMUNITY.</p>
+                    </div>
+
+                    <!-- Bottom Section (Footer) -->
+                    <div class="flex-1 flex flex-col justify-end">
+                        <p id="render-footer" class="text-sm tracking-widest uppercase font-semibold text-[#fce7ab] opacity-80">
+                            APPLY AT THE LINK IN BIO ✨ #ASTROLOGY
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const logoUpload = document.getElementById('logo-upload');
+            const watermarkImg = document.getElementById('watermark-img');
+            const logoTlImg = document.getElementById('logo-tl-img');
+            const logoBrImg = document.getElementById('logo-br-img');
+            
+            const headingInput = document.getElementById('heading-input');
+            const bodyInput = document.getElementById('body-input');
+            const footerInput = document.getElementById('footer-input');
+            
+            const renderHeading = document.getElementById('render-heading');
+            const renderBody = document.getElementById('render-body');
+            const renderFooter = document.getElementById('render-footer');
+            
+            const bgColor1 = document.getElementById('bg-color-1');
+            const bgColor2 = document.getElementById('bg-color-2');
+            const textColor = document.getElementById('text-color');
+            const glowColor = document.getElementById('glow-color');
+            const watermarkOpacity = document.getElementById('watermark-opacity');
+            const opacityVal = document.getElementById('opacity-val');
+            
+            const postCanvas = document.getElementById('post-canvas');
+            const downloadBtn = document.getElementById('download-btn');
+
+            // Handle Image Upload
+            logoUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const imgUrl = event.target.result;
+                        
+                        // Set sources
+                        watermarkImg.src = imgUrl;
+                        logoTlImg.src = imgUrl;
+                        logoBrImg.src = imgUrl;
+                        
+                        // Unhide images
+                        watermarkImg.classList.remove('hidden');
+                        logoTlImg.classList.remove('hidden');
+                        logoBrImg.classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Handle Text Inputs Real-time
+            const updateText = (inputEl, renderEl) => {
+                inputEl.addEventListener('input', (e) => {
+                    renderEl.textContent = e.target.value;
+                });
+            };
+            updateText(headingInput, renderHeading);
+            updateText(bodyInput, renderBody);
+            updateText(footerInput, renderFooter);
+
+            // Handle Colors & Styling Real-time
+            const updateBackground = () => {
+                postCanvas.style.background = `linear-gradient(135deg, ${bgColor1.value} 0%, ${bgColor2.value} 100%)`;
+            };
+            bgColor1.addEventListener('input', updateBackground);
+            bgColor2.addEventListener('input', updateBackground);
+
+            textColor.addEventListener('input', (e) => {
+                const color = e.target.value;
+                renderHeading.style.color = color;
+                renderBody.style.color = color;
+                renderFooter.style.color = color;
+                // Update border color to match text color slightly transparent
+                document.querySelector('.canvas-border').style.borderColor = `${color}4D`; // 30% opacity hex
+            });
+
+            glowColor.addEventListener('input', (e) => {
+                const color = e.target.value;
+                // Update CSS Variable for glow
+                document.documentElement.style.setProperty('--glow-color', color);
+            });
+
+            watermarkOpacity.addEventListener('input', (e) => {
+                const val = e.target.value;
+                watermarkImg.style.opacity = val / 100;
+                opacityVal.textContent = `${val}%`;
+            });
+
+            // Handle Download using html2canvas
+            downloadBtn.addEventListener('click', async () => {
+                try {
+                    // Visual feedback
+                    const originalText = downloadBtn.innerHTML;
+                    downloadBtn.innerHTML = `
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating...
+                    `;
+                    downloadBtn.disabled = true;
+
+                    // Capture the canvas
+                    const canvas = await html2canvas(postCanvas, {
+                        scale: 3, // High resolution for Instagram (1080x1350 equivalent)
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: null // Keeps gradient background
+                    });
+
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.download = `social-post-${Date.now()}.png`;
+                    link.href = canvas.toDataURL('image/png', 1.0);
+                    link.click();
+
+                } catch (error) {
+                    console.error('Error generating image:', error);
+                    alert('There was an error generating your image. Please try again.');
+                } finally {
+                    // Restore button
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Download Post</span>
+                    `;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

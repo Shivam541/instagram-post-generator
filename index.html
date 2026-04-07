@@ -24,6 +24,9 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0f172a; /* Tailwind slate-900 */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         .font-serif {
@@ -475,13 +478,18 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Generating...
+                        Generating High-Res...
                     `;
                     downloadBtn.disabled = true;
 
+                    // Calculate scale to guarantee a super high-res output (2160px width = 2x Instagram standard)
+                    const targetWidth = 2160;
+                    const currentWidth = postCanvas.offsetWidth || 400; // fallback just in case
+                    const scaleFactor = targetWidth / currentWidth;
+
                     // Capture the canvas
                     const canvas = await html2canvas(postCanvas, {
-                        scale: 3, // High resolution for Instagram (1080x1350 equivalent)
+                        scale: scaleFactor, 
                         useCORS: true,
                         allowTaint: true,
                         backgroundColor: null // Keeps gradient background
